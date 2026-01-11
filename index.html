@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting System Complaint Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Voting System Complaint Portal</h1>
+            <p>Securely report issues with your voting experience</p>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="new-complaint">File New Complaint</div>
+            <div class="tab" data-tab="track-complaint">Track Complaint</div>
+        </div>
+
+        <div id="new-complaint" class="tab-content active">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2>Submit Your Complaint</h2>
+                    <p>Please provide detailed information to help us resolve your issue promptly</p>
+                </div>
+
+                <div class="alert alert-success" id="successAlert">
+                    Your complaint has been submitted successfully! Your complaint ID is: 
+                    <span id="complaintId"></span>
+                    <button class="copy-btn" onclick="copyComplaintId()">Copy</button>
+                    <button class="track-link-btn" id="goToTrackBtn">Track Status</button>
+                    <button class="download-btn" onclick="downloadReceipt()">Download Receipt</button>
+                </div>
+                <div class="alert alert-danger" id="errorAlert"></div>
+
+                <form id="complaintForm">
+                    <div class="form-group">
+                        <label for="fullName" class="required">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" maxlength="100" required>
+                        <div class="validation-error" id="fullNameError">Please enter your full name</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="voterId" class="required">Voter ID</label>
+                        <input type="text" id="voterId" name="voterId" maxlength="100" required>
+                        <div class="validation-error" id="voterIdError">Please enter a valid Voter ID or Email</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="complaintType" class="required">Complaint Type</label>
+                        <select id="complaintType" name="complaintType" required>
+                            <option value="">-- Select Complaint Type --</option>
+                            <optgroup label="Voter Identity & Access Issues">
+                                <option value="vote-already-cast">My vote was already cast by someone else</option>
+                                <option value="missing-from-list">My name is missing from the voter list</option>
+                                <option value="denied-voting">I was denied voting due to incorrect ID verification</option>
+                                <option value="no-voting-token">I received no voting token or access link</option>
+                                <option value="unable-to-login">I was unable to log in to the voting system</option>
+                            </optgroup>
+                            <optgroup label="Voting Process Issues">
+                                <option value="interface-not-working">The voting interface was not functioning properly</option>
+                                <option value="submit-error">I couldn't submit my vote — system error occurred</option>
+                                <option value="wrong-candidate">My vote went to the wrong candidate</option>
+                                <option value="no-confirmation">I didn't receive a confirmation (receipt/VVPAT) of my vote</option>
+                                <option value="not-in-blockchain">My vote is not showing in the blockchain verification record</option>
+                            </optgroup>
+                            <optgroup label="Fraud or Misuse Suspicions">
+                                <option value="vote-tampering">I suspect vote tampering or manipulation</option>
+                                <option value="credential-misuse">Someone else tried to vote using my credentials</option>
+                                <option value="multiple-votes">Multiple votes cast from one device/IP — suspicious activity</option>
+                                <option value="suspicious-behavior">Suspicious behavior observed at polling booth</option>
+                            </optgroup>
+                            <optgroup label="Polling Station Complaints">
+                                <option value="staff-bias">Polling staff were biased or misbehaving</option>
+                                <option value="accessibility-issues">No facilities for elderly or disabled voters</option>
+                                <option value="unsafe-environment">Voting environment was unsafe or intimidating</option>
+                                <option value="long-wait">Long waiting time or technical delays at the booth</option>
+                            </optgroup>
+                            <optgroup label="Technical/Platform-Related Issues">
+                                <option value="system-slow">System was too slow or crashed during voting</option>
+                                <option value="website-errors">Website/app not loading or showing errors</option>
+                                <option value="verification-failed">Biometric or OTP verification failed repeatedly</option>
+                                <option value="no-support">No help or support available during the issue</option>
+                            </optgroup>
+                            <optgroup label="Support & Follow-Up">
+                                <option value="no-response">I filed a complaint earlier but got no response</option>
+                                <option value="record-correction">I need help with a correction in my voting record</option>
+                                <option value="clarification">Need clarification on voting guidelines or errors</option>
+                            </optgroup>
+                            <option value="other">Other issue not listed above</option>
+                        </select>
+                        <div class="validation-error" id="complaintTypeError">Please select a complaint type</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="incidentDate" class="required">Date and Time of Incident</label>
+                        <input type="datetime-local" id="incidentDate" name="incidentDate" required>
+                        <div class="validation-error" id="incidentDateError">Please select a valid date and time</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Location (Optional)</label>
+                        <input type="text" id="location" name="location" maxlength="200" placeholder="Polling station or online platform">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description" class="required">Description of the Issue</label>
+                        <textarea id="description" name="description" maxlength="2000" placeholder="Please provide detailed information about your issue..." required></textarea>
+                        <div class="validation-error" id="descriptionError">Please provide a detailed description</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fileInput">Upload Evidence (Optional, max 5MB)</label>
+                        <div class="file-input-container">
+                            <label for="fileInput" class="file-input-label">Choose File</label>
+                            <input type="file" id="fileInput" name="fileInput" accept="image/*,.pdf,.doc,.docx">
+                            <div class="file-name" id="fileName">No file selected</div>
+                            <div class="progress-container" id="uploadProgress">
+                                <div class="progress-bar" id="progressBar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactInfo" class="required">Contact Info for Follow-Up</label>
+                        <input type="text" id="contactInfo" name="contactInfo" maxlength="100" placeholder="Phone number or email" required>
+                        <div class="validation-error" id="contactInfoError">Please provide valid contact information</div>
+                    </div>
+
+                    <div class="btn-container">
+                        <button type="button" id="resetBtn">Reset Form</button>
+                        <button type="submit" id="submitBtn">
+                            <div class="spinner" id="submitSpinner"></div>
+                            Submit Complaint
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="track-complaint" class="tab-content">
+            <div class="tracking-section">
+                <h3>Track Your Complaint Status</h3>
+                <div class="tracking-form">
+                    <input type="text" id="trackingId" placeholder="Enter your complaint ID">
+                    <button id="trackBtn">
+                        <div class="spinner" id="trackSpinner"></div>
+                        Track
+                    </button>
+                </div>
+
+                <div id="complaintDetails">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4>Complaint Details</h4>
+                        <button class="download-btn" onclick="downloadReceipt()">Download Receipt</button>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Status:</div>
+                        <div class="detail-value"><span class="status-badge" id="statusValue"></span></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Complaint Type:</div>
+                        <div class="detail-value" id="typeValue"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Submitted On:</div>
+                        <div class="detail-value" id="dateValue"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Description:</div>
+                        <div class="detail-value" id="descriptionValue"></div>
+                    </div>
+                    <div class="detail-row" id="resolutionNoteRow" style="display: none;">
+                        <div class="detail-label">Resolution Note:</div>
+                        <div class="detail-value" id="resolutionNoteValue"></div>
+                    </div>
+                    <div class="detail-row" id="cancellationReasonRow" style="display: none;">
+                        <div class="detail-label">Cancellation Reason:</div>
+                        <div class="detail-value" id="cancellationReasonValue"></div>
+                    </div>
+
+                    <div class="status-timeline">
+                        <h3>Status Timeline</h3>
+                        <div class="timeline">
+                            <div class="timeline-item active">
+                                <div class="timeline-title">Complaint Received</div>
+                                <div class="timeline-date" id="receivedDate"></div>
+                            </div>
+                            <div class="timeline-item" id="reviewingItem">
+                                <div class="timeline-title">Under Review</div>
+                                <div class="timeline-date" id="reviewDate">Pending</div>
+                            </div>
+                            <div class="timeline-item" id="investigatingItem">
+                                <div class="timeline-title">Investigation</div>
+                                <div class="timeline-date" id="investigateDate">Pending</div>
+                            </div>
+                            <div class="timeline-item" id="resolvedItem">
+                                <div class="timeline-title">Resolved</div>
+                                <div class="timeline-date" id="resolveDate">Pending</div>
+                            </div>
+                            <div class="timeline-item" id="canceledItem">
+                                <div class="timeline-title">Canceled</div>
+                                <div class="timeline-date" id="cancelDate">Pending</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/complaint.js"></script>
+</body>
+</html>
